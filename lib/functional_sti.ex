@@ -29,24 +29,20 @@ defmodule Foo.TypedTable do
   end
 
   def create_monkey do
-    %Foo.TypedTable{type: "monkey"} |> Foo.Repo.insert!
+    %Foo.TypedTable{type: "Foo.MonkeySay"} |> Foo.Repo.insert!
   end
 
   def create_man_in_yellow_hat do
-    %Foo.TypedTable{type: "man"} |> Foo.Repo.insert!
+    %Foo.TypedTable{type: "Foo.ManSay"} |> Foo.Repo.insert!
   end
 
   def all do
     Foo.TypedTable |> Foo.Repo.all
   end
 
-  def say(%Foo.TypedTable{type: "monkey"} = record) do
-    IO.puts "monkey say monkey do"
-    IO.inspect record
-  end
-
-  def say(%Foo.TypedTable{type: "man"} = record) do
-    IO.puts "george!!"
+  def say(%Foo.TypedTable{type: module_name} = record) do
+    say = quote do: Module.concat(__MODULE__, unquote(module_name)).say
+    Code.eval_quoted(say)
     IO.inspect record
   end
 
@@ -54,6 +50,18 @@ defmodule Foo.TypedTable do
     Foo.TypedTable.create_monkey
     Foo.TypedTable.create_man_in_yellow_hat
     Foo.TypedTable.all |> Enum.each  &Foo.TypedTable.say/1
+  end
+end
+
+defmodule Foo.MonkeySay do
+  def say do
+    IO.puts "monkey say monkey do"
+  end
+end
+
+defmodule Foo.ManSay do
+  def say do
+    IO.puts "george!!"
   end
 end
 
